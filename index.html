@@ -3,236 +3,605 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>大髙 ランニングダイナミクス解析</title>
+<title>大髙 ランニングダイナミクス解析レポート 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background: #0a0a0f;
-    color: #e0e0e0;
-    min-height: 100vh;
-    padding: 24px;
-  }
-  .header {
-    text-align: center;
-    margin-bottom: 36px;
-  }
-  .header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: 0.05em;
-  }
-  .header p {
-    font-size: 13px;
-    color: #888;
-    margin-top: 6px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  .card {
-    background: #13131a;
-    border: 1px solid #1e1e2e;
-    border-radius: 12px;
-    padding: 20px;
-  }
-  .card.wide {
-    grid-column: 1 / -1;
-  }
-  .card h2 {
-    font-size: 13px;
-    font-weight: 600;
-    color: #aaa;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 4px;
-  }
-  .card .subtitle {
-    font-size: 12px;
-    color: #555;
-    margin-bottom: 16px;
-  }
-  .chart-wrap {
-    position: relative;
-    height: 260px;
-  }
-  .chart-wrap.tall {
-    height: 300px;
-  }
-  .stats-row {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-  .stat {
-    flex: 1;
-    min-width: 100px;
-    background: #0d0d14;
-    border: 1px solid #1a1a28;
-    border-radius: 8px;
-    padding: 10px 14px;
-  }
-  .stat .label {
-    font-size: 10px;
-    color: #666;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-  .stat .value {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    margin: 2px 0;
-  }
-  .stat .delta {
-    font-size: 11px;
-  }
-  .delta.good { color: #4ade80; }
-  .delta.warn { color: #f59e0b; }
-  .delta.bad  { color: #f87171; }
-  .annotation {
-    font-size: 11px;
-    color: #666;
-    margin-top: 10px;
-    line-height: 1.6;
-    border-left: 2px solid #2a2a3e;
-    padding-left: 10px;
-  }
-  .annotation strong { color: #aaa; }
+:root {
+  --bg:       #08080f;
+  --surface:  #10101a;
+  --surface2: #14141f;
+  --border:   #1e1e30;
+  --text:     #e4e4f0;
+  --muted:    #6b6b8a;
+  --accent:   #7c6ef5;
+  --green:    #4ade80;
+  --yellow:   #facc15;
+  --orange:   #fb923c;
+  --red:      #f87171;
+  --blue:     #38bdf8;
+  --amber:    #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Helvetica Neue', 'Noto Sans JP', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── NAV ──────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(8,8,15,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px;
+}
+.nav-brand {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--accent); text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 24px; flex-wrap: wrap; }
+.nav-links a {
+  font-size: 12px; color: var(--muted); text-decoration: none;
+  letter-spacing: 0.05em; transition: color 0.2s;
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ── HERO ─────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 80px 48px 60px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 50%, rgba(124,110,245,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 80% 30%, rgba(56,189,248,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-tag {
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-tag::before {
+  content: ''; display: block; width: 24px; height: 1px; background: var(--accent);
+}
+.hero h1 {
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  background: linear-gradient(120deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero h1 span { color: var(--accent); -webkit-text-fill-color: unset; }
+.hero-sub {
+  font-size: 16px; color: var(--muted); max-width: 560px; margin-bottom: 48px;
+}
+.hero-kpi {
+  display: flex; gap: 40px; flex-wrap: wrap;
+}
+.kpi {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.kpi-label {
+  font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+}
+.kpi-value {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: #fff;
+}
+.kpi-value.green { color: var(--green); }
+.kpi-value.red   { color: var(--red); }
+.kpi-value.blue  { color: var(--blue); }
+.kpi-delta {
+  font-size: 11px; color: var(--muted);
+}
+.hero-scroll {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  font-size: 11px; color: var(--muted); letter-spacing: 0.08em;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.hero-scroll::after {
+  content: '';
+  display: block; width: 1px; height: 32px;
+  background: linear-gradient(to bottom, var(--muted), transparent);
+}
+
+/* ── SECTION ──────────────────────────────────────────── */
+section {
+  padding: 80px 48px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.section-tag {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.section-title {
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 800; letter-spacing: -0.01em; margin-bottom: 10px;
+}
+.section-body {
+  font-size: 14px; color: var(--muted); max-width: 640px; margin-bottom: 48px;
+}
+
+/* ── DIVIDER ──────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+/* ── CARD GRID ────────────────────────────────────────── */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+.col-12 { grid-column: span 12; }
+.col-7  { grid-column: span 7; }
+.col-5  { grid-column: span 5; }
+.col-6  { grid-column: span 6; }
+.col-4  { grid-column: span 4; }
+.col-8  { grid-column: span 8; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124,110,245,0.3), transparent);
+}
+.card-eyebrow {
+  font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.card-title {
+  font-size: 14px; font-weight: 700; margin-bottom: 2px;
+}
+.card-sub {
+  font-size: 12px; color: var(--muted); margin-bottom: 20px;
+}
+.chart-wrap { position: relative; }
+
+/* ── METRICS ROW ──────────────────────────────────────── */
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.metric {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+}
+.metric-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.metric-value { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin: 4px 0 2px; }
+.metric-note  { font-size: 11px; }
+.ok   { color: var(--green); }
+.warn { color: var(--yellow); }
+.ng   { color: var(--red); }
+
+/* ── INSIGHT BOX ──────────────────────────────────────── */
+.insight {
+  background: rgba(124,110,245,0.06);
+  border: 1px solid rgba(124,110,245,0.2);
+  border-radius: 12px; padding: 18px 20px;
+  font-size: 13px; line-height: 1.8; color: var(--muted);
+  margin-top: 16px;
+}
+.insight strong { color: var(--text); }
+
+/* ── GOAL CARDS ───────────────────────────────────────── */
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px; margin-top: 48px;
+}
+.goal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+}
+.goal-icon { font-size: 28px; margin-bottom: 12px; }
+.goal-event { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.goal-title { font-size: 17px; font-weight: 700; margin: 4px 0; }
+.goal-target { font-size: 22px; font-weight: 800; color: var(--accent); }
+.goal-pace   { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 16px; }
+.progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--blue)); }
+
+/* ── PLAN CARDS (coach action plan) ───────────────────── */
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.plan-head { display: flex; align-items: center; gap: 10px; }
+.plan-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 5px 10px; border-radius: 999px;
+}
+.plan-badge.a { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+.plan-badge.b { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+.plan-badge.r { background: rgba(124,110,245,0.12); color: var(--accent); border: 1px solid rgba(124,110,245,0.3); }
+.plan-name { font-size: 16px; font-weight: 800; }
+.plan-gear { font-size: 12px; color: var(--muted); }
+.plan-list { font-size: 13px; color: var(--muted); line-height: 1.9; padding-left: 18px; }
+.plan-list li { margin-bottom: 4px; }
+.plan-list strong { color: var(--text); }
+.plan-cue {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 12.5px; color: var(--text); line-height: 1.8;
+}
+.plan-cue strong { color: var(--accent); }
+
+/* ── FOOTER ───────────────────────────────────────────── */
+footer {
+  text-align: center; padding: 48px;
+  font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+footer span { color: var(--accent); }
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { gap: 16px; }
+  .hero { padding: 100px 24px 60px; }
+  section { padding: 60px 24px; }
+  .col-7, .col-5, .col-6, .col-4, .col-8 { grid-column: span 12; }
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>🏃 大髙 ランニングダイナミクス解析</h1>
-  <p>2026年1月〜6月 ｜ COROSデータ精密分析</p>
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">🏃 RUN ANALYTICS</div>
+  <div class="nav-links">
+    <a href="#overview">概要</a>
+    <a href="#session">セッション分析</a>
+    <a href="#trap">ストライドの罠</a>
+    <a href="#evolution">5ヶ月の進化</a>
+    <a href="#plan">次回メニュー</a>
+    <a href="#goals">目標</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="top">
+  <div class="hero-tag">Running Dynamics Report 2026</div>
+  <h1>大髙 龍<br><span>ランニング</span><br>解析レポート</h1>
+  <p class="hero-sub">
+    COROS フライトデータを完全解析。<br>
+    接地時間・ピッチ・ストライド・心拍ゾーンの相互連動から、<br>サブ4への最短経路を導き出す。
+  </p>
+  <div class="hero-kpi">
+    <div class="kpi">
+      <span class="kpi-label">最小接地時間</span>
+      <span class="kpi-value green">188 ms</span>
+      <span class="kpi-delta">5ヶ月前比 ▲77ms 🚀</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">巡航ピッチ</span>
+      <span class="kpi-value blue">178〜182 spm</span>
+      <span class="kpi-delta">目標ゾーン到達</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">最大心拍（6/5）</span>
+      <span class="kpi-value red">189 bpm</span>
+      <span class="kpi-delta">無酸素突入 → 要改善</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-label">Target Race</span>
+      <span class="kpi-value">Sub 4:00</span>
+      <span class="kpi-delta">びわ湖マラソン 2027.3.14</span>
+    </div>
+  </div>
+  <div class="hero-scroll">SCROLL</div>
 </div>
 
-<div class="grid">
+<hr class="divider">
 
-  <!-- Chart 1: 6/5 セッション時系列 -->
-  <div class="card wide">
-    <h2>① 6月5日セッション ｜ ペース・ストライド・ピッチ・心拍の時系列</h2>
-    <p class="subtitle">「ストライドの罠」が起動する瞬間を可視化</p>
-    <div class="chart-wrap tall">
-      <canvas id="chart1"></canvas>
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview">
+  <div class="section-tag">Overview</div>
+  <h2 class="section-title">現在地のサマリー</h2>
+  <p class="section-body">6月5日のBメニュー（5'35"/km）データを基に、主要ダイナミクス指標の達成度を評価する。</p>
+
+  <div class="metrics-strip">
+    <div class="metric">
+      <div class="metric-label">接地時間（最小）</div>
+      <div class="metric-value ok">188 ms</div>
+      <div class="metric-note ok">✅ 目標 ≤210ms 達成</div>
     </div>
-    <p class="annotation">
-      <strong>🔴 赤ゾーン（秒200〜220付近）：</strong>ピッチは178〜180spmで固定されたまま、ストライド長が115cm→136cmへ急拡大（+21cm）。速度はピッチではなく歩幅で稼がれている。同時に心拍が180→183bpmへ跳ね上がり、無酸素ゾーンに突入。<br>
-      <strong>🟡 後半（秒250〜350）：</strong>スピードが落ちても心拍は186〜189bpmへ上昇し続ける。「疲弊ドリフト」と呼ぶ現象。脚の疲労が蓄積し、接地時間も207msまで延びている。
-    </p>
-  </div>
-
-  <!-- Chart 2: 速度 vs ストライド散布図 -->
-  <div class="card">
-    <h2>② 速度 vs ストライド長 ｜ 「ストライドの罠」散布図</h2>
-    <p class="subtitle">右上がりの直線＝「蹴り出し主導」の証拠</p>
-    <div class="chart-wrap">
-      <canvas id="chart2"></canvas>
+    <div class="metric">
+      <div class="metric-label">接地時間（後半最大）</div>
+      <div class="metric-value warn">213 ms</div>
+      <div class="metric-note warn">△ 疲労で上昇</div>
     </div>
-    <p class="annotation">
-      <strong>理想：</strong>速度が上がってもストライドは110cm前後でキープし、ピッチ(色)が青→赤へ変わるべき。<br>
-      <strong>現実：</strong>ピッチはほぼ固定（178〜182spm）のまま、ストライドだけが直線的に伸びている。
-    </p>
-  </div>
-
-  <!-- Chart 3: 5ヶ月進化比較 -->
-  <div class="card">
-    <h2>③ 1月 vs 6月 ｜ 主要指標の進化</h2>
-    <p class="subtitle">5ヶ月間で何が変わったか</p>
-    <div class="chart-wrap">
-      <canvas id="chart3"></canvas>
+    <div class="metric">
+      <div class="metric-label">ピッチ（巡航）</div>
+      <div class="metric-value ok">178〜182</div>
+      <div class="metric-note ok">✅ 目標ゾーン内</div>
     </div>
-    <p class="annotation">
-      <strong>最大の進化：</strong>接地時間が最大265ms→188msへ短縮（▲77ms）。足裏反発の神経回路が根本から書き換わった。ピッチ下限も174→178spmへ底上げされた。
-    </p>
-  </div>
-
-  <!-- Chart 4: 心拍ゾーン -->
-  <div class="card">
-    <h2>④ 6月5日 ｜ 心拍ゾーン分布</h2>
-    <p class="subtitle">無酸素ゾーン突入の時間を定量化</p>
-    <div class="chart-wrap">
-      <canvas id="chart4"></canvas>
+    <div class="metric">
+      <div class="metric-label">ピッチ（後半）</div>
+      <div class="metric-value ng">174〜176</div>
+      <div class="metric-note ng">❌ 疲弊ドリフト</div>
     </div>
-    <p class="annotation">
-      <strong>問題：</strong>全体の約35%が180bpm超（無酸素ゾーン）。サブ4達成には、この無酸素時間をゼロに近づけながら同じペースを維持できる閾値の引き上げが必要。
-    </p>
-  </div>
-
-  <!-- Chart 5: 接地時間 vs 上下動の関係 -->
-  <div class="card wide">
-    <h2>⑤ 接地時間 vs 上下動 ｜ 省エネランのスイートスポット</h2>
-    <p class="subtitle">左下（短接地・低上下動）が省エネゾーン。色は心拍数</p>
-    <div class="chart-wrap tall">
-      <canvas id="chart5"></canvas>
+    <div class="metric">
+      <div class="metric-label">上下動（巡航）</div>
+      <div class="metric-value warn">8.7〜9.4 cm</div>
+      <div class="metric-note warn">△ 上限9.0cmを超過</div>
     </div>
-    <p class="annotation">
-      <strong>読み方：</strong>左下（接地時間短い＋上下動小さい）ほど省エネ。6月5日のデータでは、ウォームアップ〜中盤は良好なポジション（188〜200ms / 7.9〜8.8cm）に集中。後半疲労で右上にドリフトしているのが見える。
-    </p>
+    <div class="metric">
+      <div class="metric-label">最大ストライド</div>
+      <div class="metric-value ng">136 cm</div>
+      <div class="metric-note ng">❌ 目標 ≤115cm</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">最大心拍</div>
+      <div class="metric-value ng">189 bpm</div>
+      <div class="metric-note ng">❌ 無酸素ゾーン突入</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">1月→6月 接地改善</div>
+      <div class="metric-value ok">▲77 ms</div>
+      <div class="metric-note ok">✅ 劇的な神経適応</div>
+    </div>
   </div>
+</section>
 
-  <!-- 改善サマリー -->
-  <div class="card wide">
-    <h2>⑥ 指標サマリー ｜ 現在地とサブ4目標値</h2>
-    <p class="subtitle">各指標の達成度</p>
-    <div class="stats-row">
-      <div class="stat">
-        <div class="label">接地時間（最小）</div>
-        <div class="value" style="color:#4ade80">188ms</div>
-        <div class="delta good">目標 ≤210ms ✅</div>
+<hr class="divider">
+
+<!-- SECTION 2: SESSION ANALYSIS -->
+<section id="session">
+  <div class="section-tag">Session Analysis · 2026.06.05</div>
+  <h2 class="section-title">6月5日 Bメニュー<br>時系列解析</h2>
+  <p class="section-body">ストライド・ピッチ・心拍の連動パターンを1秒単位で追う。「罠が起動する瞬間」を特定する。</p>
+
+  <div class="chart-grid">
+    <div class="card col-12">
+      <div class="card-eyebrow">Time Series · 7.44km · avg 5'35"/km</div>
+      <div class="card-title">ストライド長 / ピッチ / 心拍数の時系列推移</div>
+      <div class="card-sub">秒200〜215付近：ストライドが136cmへ急拡大 → 心拍が無酸素ゾーンへ突入</div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="chart1"></canvas>
       </div>
-      <div class="stat">
-        <div class="label">接地時間（最大）</div>
-        <div class="value" style="color:#f59e0b">213ms</div>
-        <div class="delta good">目標 ≤225ms ✅</div>
+      <div class="insight">
+        <strong>🔴 秒200〜215（スピード区間）：</strong>ピッチは178〜180spmで固定されたまま、ストライドが115cm→136cmへ+21cm急拡大。速度はピッチではなく歩幅で稼がれている。同時に心拍が180→183bpmへ跳ね上がり、無酸素ゾーン突入。<br><br>
+        <strong>🟡 秒250〜350（後半疲弊）：</strong>スピードが落ちても心拍は186〜189bpmへ上昇し続ける「疲弊ドリフト」。ピッチも174〜176spmへ低下し、接地時間が207〜213msまで延びている。
       </div>
-      <div class="stat">
-        <div class="label">ピッチ（巡航）</div>
-        <div class="value" style="color:#4ade80">178〜182</div>
-        <div class="delta good">目標 ≥178spm ✅</div>
+    </div>
+
+    <div class="card col-7">
+      <div class="card-eyebrow">Heart Rate Zones · 6/5</div>
+      <div class="card-title">心拍ゾーン分布</div>
+      <div class="card-sub">無酸素ゾーン（Z5）の占有率を定量化</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="chart4"></canvas>
       </div>
-      <div class="stat">
-        <div class="label">ピッチ（疲労後）</div>
-        <div class="value" style="color:#f87171">174〜176</div>
-        <div class="delta bad">目標 ≥178spm ❌</div>
+      <div class="insight">
+        <strong>課題：</strong>全体の約35%が180bpm超（無酸素Z5）。サブ4達成には、同じペースをZ4（170〜179）以下でコントロールできる閾値向上が必要。
       </div>
-      <div class="stat">
-        <div class="label">上下動（巡航）</div>
-        <div class="value" style="color:#4ade80">8.7〜9.4</div>
-        <div class="delta good">目標 ≤9.0cm △</div>
+    </div>
+
+    <div class="card col-5">
+      <div class="card-eyebrow">Efficiency Map · 6/5</div>
+      <div class="card-title">接地時間 × 上下動<br>省エネゾーンマップ</div>
+      <div class="card-sub">左下（緑）が省エネ。色＝心拍数</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="chart5"></canvas>
       </div>
-      <div class="stat">
-        <div class="label">最大心拍</div>
-        <div class="value" style="color:#f87171">189bpm</div>
-        <div class="delta bad">目標 ≤180bpm ❌</div>
-      </div>
-      <div class="stat">
-        <div class="label">スピード時ストライド</div>
-        <div class="value" style="color:#f87171">136cm</div>
-        <div class="delta bad">目標 ≤115cm ❌</div>
-      </div>
-      <div class="stat">
-        <div class="label">1月→6月 接地改善</div>
-        <div class="value" style="color:#4ade80">▲77ms</div>
-        <div class="delta good">5ヶ月で大幅向上 🚀</div>
+      <div class="insight">
+        <strong>読み方：</strong>後半疲労で点が右上（赤ゾーン）へドリフト。緑の破線内が「サブ4の常用域」。
       </div>
     </div>
   </div>
+</section>
 
-</div>
+<hr class="divider">
+
+<!-- SECTION 3: STRIDE TRAP -->
+<section id="trap">
+  <div class="section-tag">Biomechanics · The Stride Trap</div>
+  <h2 class="section-title">「ストライドの罠」<br>バイオメカニクス解析</h2>
+  <p class="section-body">スピードを上げたとき、ピッチは固定されたままストライドだけが伸びる。これが無酸素突入の根本原因だ。</p>
+
+  <div class="chart-grid">
+    <div class="card col-8">
+      <div class="card-eyebrow">Scatter · Speed vs Stride Length</div>
+      <div class="card-title">速度 vs ストライド長</div>
+      <div class="card-sub">緑破線＝ピッチ主導の理想ライン。右上の赤点＝「罠」発動データ</div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chart2"></canvas>
+      </div>
+    </div>
+    <div class="card col-4" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card-eyebrow">The Trap · Explained</div>
+      <div class="card-title">なぜストライドが伸びるのか</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.9;flex:1;">
+        <p style="margin-bottom:12px;">速度を出すとき、身体は2つの方法しか持っていない。</p>
+        <p style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:12px;margin-bottom:10px;color:var(--text);">
+          ❌ <strong>現状</strong><br>ピッチ固定 (178 spm) × ストライド拡大 (115→136cm)<br>
+          <span style="color:var(--muted);font-size:12px;">→ 蹴り出し強化 → 上下動増加 → 心拍急上昇</span>
+        </p>
+        <p style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:8px;padding:12px;color:var(--text);">
+          ✅ <strong>目標</strong><br>ピッチ向上 (178→186 spm) × ストライド維持 (~113cm)<br>
+          <span style="color:var(--muted);font-size:12px;">→ 省エネ加速 → 上下動安定 → 心拍制御</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SECTION 4: EVOLUTION -->
+<section id="evolution">
+  <div class="section-tag">5-Month Progress · Jan → Jun 2026</div>
+  <h2 class="section-title">5ヶ月間の進化</h2>
+  <p class="section-body">1月のデータと6月のデータを比較する。足裏神経系の適応が数字に出ている。</p>
+
+  <div class="chart-grid">
+    <div class="card col-12">
+      <div class="card-eyebrow">Comparison · Jan 2026 vs Jun 2026</div>
+      <div class="card-title">主要ダイナミクス指標の変化</div>
+      <div class="card-sub">緑が6月。接地時間の劇的短縮（265ms→188ms）に注目</div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chart3"></canvas>
+      </div>
+      <div class="insight">
+        <strong>🚀 最大の進化：</strong>接地時間の最小値が211ms（1月）→188ms（6月）へ短縮（▲23ms）。最大値は265ms→213ms（▲52ms）。これはワラーチトレーニングとタビオが足裏の反射神経回路を根本から書き換えた証拠だ。ピッチ下限も174→178spmへ底上げされ、「失速しにくい走り」が構築されてきている。
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SECTION 5: COACH'S ACTION PLAN -->
+<section id="plan">
+  <div class="section-tag">Coach's Verdict · Next Sessions</div>
+  <h2 class="section-title">次回に向けた処方箋<br>「足を出すな、足を回せ」</h2>
+  <p class="section-body">5ヶ月で接地時間を▲52ms短縮した。階段はもう半分以上のぼっている。残るのは「頭が知っていることを、速いペースでも身体に実行させる」だけ。次の週2回はこれをやる。</p>
+
+  <div class="plan-grid">
+    <!-- A メニュー -->
+    <div class="plan-card">
+      <div class="plan-head">
+        <span class="plan-badge a">平日 A · 低強度</span>
+        <span class="plan-name">ストライドリセット走</span>
+      </div>
+      <div class="plan-gear">👟 ワラーチ × タビオ（最優先）｜ 鴨川ロード ｜ 最大2時間</div>
+      <ul class="plan-list">
+        <li><strong>設定：</strong>ペース 7'00〜7'30/km ／ 心拍 130bpm以下（通常より5bpm低く設定）／ ピッチ 180〜183spm</li>
+        <li><strong>狙い：</strong>今週の「大股の記憶」をワラーチで上書きする。クッションゼロのソールで蹴ると痛い → 自然と引き足主導に矯正される</li>
+        <li><strong>サイレントラン：</strong>着地音ゼロを15分間徹底。「置く」感覚を骨格に刻む</li>
+        <li><strong>ラスト1km・ピッチゲーム：</strong>ペースは維持したままピッチを183→186→189spmへ。ストライドが70〜80cmまで縮む感覚を体験する</li>
+        <li><strong>仕上げ：</strong>ゴルフボール足裏リリース（土踏まず→母指球→踵 各90秒）</li>
+      </ul>
+      <div class="plan-cue"><strong>意識キュー：</strong>「速く行きたい時ほど、歩幅を疑え」</div>
+    </div>
+
+    <!-- B メニュー -->
+    <div class="plan-card">
+      <div class="plan-head">
+        <span class="plan-badge b">平日 B · 高強度</span>
+        <span class="plan-name">ピッチ先行インターバル</span>
+      </div>
+      <div class="plan-gear">👟 GT-2000 × タビオ（グリセリンマックスは今回封印）｜ 最大1時間</div>
+      <ul class="plan-list">
+        <li><strong>① WU 10分：</strong>6'30/km・心拍130bpm以下・サングラス装着で目線（地平線）を固定</li>
+        <li><strong>② ハイピッチ流し 100m×3本：</strong>ペースは5'30/kmのまま、ピッチだけ185〜190spmへ。ストライドを意図的に85〜90cmへ絞り「小股で速く」を焼き付ける</li>
+        <li><strong>③ メイン 20〜25分：</strong>ペース 5'25〜5'35/km固定 ／ ピッチ 180〜182spm ／ HR上限180bpm（超えたら即減速）／ ストライド目標105〜112cm（115cm超は「伸びたサイン」と即修正）</li>
+        <li><strong>④ CD 10分：</strong>7'00/km以上でゆるめる</li>
+      </ul>
+      <div class="plan-cue"><strong>なぜグリセリンを外すか：</strong>高反発クッションが今は「罠の引き金」になっている。サブ4達成までBメニューはGT-2000で接地感覚をシビアに保つ。</div>
+    </div>
+
+    <!-- リカバリー -->
+    <div class="plan-card">
+      <div class="plan-head">
+        <span class="plan-badge r">日常 · 脳疲労マネジメント</span>
+        <span class="plan-name">省エネボディのための回復ルーティン</span>
+      </div>
+      <div class="plan-gear">研究と仕事を抱える身体への、最小コストで最大効果のリカバリー</div>
+      <ul class="plan-list">
+        <li><strong>ゴルフボール足裏リリース：</strong>就寝前3分。土踏まず→母指球付け根→踵の順。高アーチゆえに短縮しやすい足底筋膜を毎晩解放する</li>
+        <li><strong>足指スプレッド：</strong>デスクワーク中に10秒×3セット。Cワイズの極細足は、靴を脱いだ後に指を「意図的に開く」だけで疲労抜けが激変する</li>
+        <li><strong>体幹リセット：</strong>腹圧ブリッジ（デッドバグ）2分／日。ワラーチ走で鍛えた「ブレない体幹」を走らない日も維持する</li>
+      </ul>
+      <div class="plan-cue"><strong>走行中の意識キュー（3つだけ）：</strong>① 目線＝50m先を水平に見る　② 腕振り＝肘を後ろに引く（前に振らない）　③ 足指＝タビオごと地面に「吸い付く」感覚で引き剥がす</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- SECTION 6: GOALS -->
+<section id="goals">
+  <div class="section-tag">Race Goals · 2027</div>
+  <h2 class="section-title">2027年レース目標</h2>
+  <p class="section-body">4つのゴールに向けた現在の進捗を可視化する。</p>
+
+  <div class="goals-grid">
+    <div class="goal-card">
+      <div class="goal-icon">🏅</div>
+      <div class="goal-event">びわ湖マラソン 2027.3.14</div>
+      <div class="goal-title">フルマラソン サブ4</div>
+      <div class="goal-target">3時間55分</div>
+      <div class="goal-pace">平均 5'34"/km</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:52%;background:linear-gradient(90deg,#7c6ef5,#38bdf8)"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">現在の閾値ペース 5'35" → あと1秒/km</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-icon">⚡</div>
+      <div class="goal-event">かすみがうら 2027 · 10マイル</div>
+      <div class="goal-title">スピード限界突破</div>
+      <div class="goal-target">1時間22分</div>
+      <div class="goal-pace">平均 5'05"/km</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:38%;background:linear-gradient(90deg,#38bdf8,#4ade80)"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">現在の最速1km: 4'56" — スピード耐久を強化</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-icon">🌊</div>
+      <div class="goal-event">サロマ湖 100km 2027</div>
+      <div class="goal-title">自己ベスト更新</div>
+      <div class="goal-target">11時間40分</div>
+      <div class="goal-pace">平均 7'00"/km</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:65%;background:linear-gradient(90deg,#4ade80,#facc15)"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">16km以上ワラーチ走行実績 → 脂質代謝は◎</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-icon">💪</div>
+      <div class="goal-event">Daily Goal · Ongoing</div>
+      <div class="goal-title">省エネ型強靭ボディ</div>
+      <div class="goal-target">ビジネス×研究</div>
+      <div class="goal-pace">脳疲労ゼロで走り続ける</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:70%;background:linear-gradient(90deg,#facc15,#f87171)"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;">週2回・鴨川ロード継続中</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<footer>
+  <p>Generated by <span>AI Running Coach</span> · Data Source: COROS Export · 2026.06.06</p>
+  <p style="margin-top:8px;">大髙龍 · 28歳 · 博士課程 / ビジネスアスリート</p>
+</footer>
 
 <script>
-// ─── データセット ───────────────────────────────────────
+Chart.defaults.color = '#6b6b8a';
+Chart.defaults.borderColor = '#1e1e30';
 
-// 6/5 時系列（秒, ペースmin/km, ストライドcm, ピッチspm, 心拍bpm, 上下動cm, 接地ms）
+// ── データ ──────────────────────────────────────────────
 const ts = [
   [0,  0,    0,   0,   152, 0,   0  ],
   [10, 5.4,  98,  184, 153, 8.4, 205],
@@ -251,12 +620,12 @@ const ts = [
   [140,5.02, 111, 180, 178, 9.1, 201],
   [150,5.05, 110, 182, 178, 8.9, 199],
   [160,4.85, 117, 180, 178, 8.7, 196],
-  [170,4.7,  118, 180, 178, 8.7, 195],
+  [170,4.70, 118, 180, 178, 8.7, 195],
   [180,4.62, 120, 180, 180, 8.7, 193],
   [190,4.65, 119, 178, 176, 8.8, 193],
   [200,4.42, 126, 180, 182, 8.7, 194],
   [205,4.22, 134, 180, 182, 8.8, 193],
-  [210,4.08, 136, 178, 183, 8.7, 191], // ← ストライドピーク
+  [210,4.08, 136, 178, 183, 8.7, 191],
   [215,4.18, 135, 178, 183, 8.7, 191],
   [220,4.47, 125, 180, 184, 8.8, 188],
   [230,4.55, 123, 178, 183, 9.2, 190],
@@ -275,16 +644,14 @@ const ts = [
 ];
 
 const labels1 = ts.map(d => d[0] + 's');
-const pace1   = ts.map(d => d[1]);
 const stride1 = ts.map(d => d[2]);
 const pitch1  = ts.map(d => d[3]);
 const hr1     = ts.map(d => d[4]);
 const vo1     = ts.map(d => d[5]);
 const stance1 = ts.map(d => d[6]);
 
-// ─── Chart 1: 時系列 ───────────────────────────────────
-const ctx1 = document.getElementById('chart1').getContext('2d');
-new Chart(ctx1, {
+// ── Chart 1 ─────────────────────────────────────────────
+new Chart(document.getElementById('chart1'), {
   type: 'line',
   data: {
     labels: labels1,
@@ -293,238 +660,150 @@ new Chart(ctx1, {
         label: 'ストライド長 (cm)',
         data: stride1,
         borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245,158,11,0.1)',
+        backgroundColor: 'rgba(245,158,11,0.08)',
         yAxisID: 'y1',
-        tension: 0.4,
-        borderWidth: 2.5,
-        pointRadius: 0,
+        tension: 0.4, borderWidth: 2.5, pointRadius: 0,
       },
       {
         label: 'ピッチ (spm)',
         data: pitch1,
         borderColor: '#38bdf8',
-        backgroundColor: 'rgba(56,189,248,0.05)',
         yAxisID: 'y2',
-        tension: 0.4,
-        borderWidth: 2,
-        borderDash: [4,3],
-        pointRadius: 0,
+        tension: 0.4, borderWidth: 2, borderDash: [4,3], pointRadius: 0,
       },
       {
         label: '心拍数 (bpm)',
         data: hr1,
         borderColor: '#f87171',
-        backgroundColor: 'rgba(248,113,113,0.08)',
+        backgroundColor: 'rgba(248,113,113,0.05)',
         yAxisID: 'y3',
-        tension: 0.4,
-        borderWidth: 2,
-        pointRadius: 0,
-        fill: false,
+        tension: 0.4, borderWidth: 2, pointRadius: 0, fill: false,
       },
     ]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
-    plugins: {
-      legend: { labels: { color: '#aaa', boxWidth: 12, font: { size: 11 } } },
-      annotation: {},
-    },
+    plugins: { legend: { labels: { color: '#aaa', boxWidth: 12, font: { size: 11 } } } },
     scales: {
-      x: {
-        ticks: { color: '#666', maxTicksLimit: 18, font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-      },
-      y1: {
-        position: 'left',
+      x: { ticks: { color: '#555', maxTicksLimit: 20, font: { size: 10 } }, grid: { color: '#1a1a2a' } },
+      y1: { position: 'left',
         title: { display: true, text: 'ストライド (cm)', color: '#f59e0b', font: { size: 10 } },
-        ticks: { color: '#f59e0b', font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-        min: 80, max: 150,
-      },
-      y2: {
-        position: 'right',
+        ticks: { color: '#f59e0b', font: { size: 10 } }, grid: { color: '#1a1a2a' },
+        min: 80, max: 150 },
+      y2: { position: 'right',
         title: { display: true, text: 'ピッチ (spm)', color: '#38bdf8', font: { size: 10 } },
-        ticks: { color: '#38bdf8', font: { size: 10 } },
-        grid: { display: false },
-        min: 160, max: 200,
-      },
-      y3: {
-        position: 'right',
+        ticks: { color: '#38bdf8', font: { size: 10 } }, grid: { display: false },
+        min: 160, max: 200 },
+      y3: { position: 'right',
         title: { display: true, text: '心拍 (bpm)', color: '#f87171', font: { size: 10 } },
-        ticks: { color: '#f87171', font: { size: 10 } },
-        grid: { display: false },
-        min: 140, max: 200,
-        offset: true,
-      },
+        ticks: { color: '#f87171', font: { size: 10 } }, grid: { display: false },
+        min: 140, max: 200, offset: true },
     }
   }
 });
 
-// ─── Chart 2: 散布図（速度 vs ストライド）───────────────
-const ctx2 = document.getElementById('chart2').getContext('2d');
-
-// 速度(m/s)に変換して散布データ作成
+// ── Chart 2 ─────────────────────────────────────────────
 const scatter2 = ts.filter(d => d[2] > 0).map(d => ({
-  x: parseFloat((1000 / (d[1] * 60)).toFixed(2)), // min/km → m/s
+  x: parseFloat((1000 / (d[1] * 60)).toFixed(2)),
   y: d[2],
-  r: 4,
 }));
-
-// 理想のトレンドライン（速度上がってもストライド固定＋ピッチ上昇）
 const idealLine = [
-  { x: 2.7, y: 96 },
-  { x: 3.0, y: 100 },
-  { x: 3.2, y: 104 },
-  { x: 3.5, y: 108 },
-  { x: 3.8, y: 112 },
-  { x: 4.0, y: 115 },
+  {x:2.7,y:96},{x:3.0,y:100},{x:3.2,y:104},{x:3.5,y:108},{x:3.8,y:112},{x:4.0,y:115}
 ];
-
-new Chart(ctx2, {
+new Chart(document.getElementById('chart2'), {
   type: 'scatter',
   data: {
     datasets: [
       {
-        label: '実測データ (6/5)',
+        label: '実測 (6/5)',
         data: scatter2,
-        backgroundColor: scatter2.map(d => {
-          if (d.y > 125) return 'rgba(248,113,113,0.8)';
-          if (d.y > 115) return 'rgba(245,158,11,0.8)';
-          return 'rgba(74,222,128,0.8)';
-        }),
-        pointRadius: 5,
-        pointHoverRadius: 7,
+        backgroundColor: scatter2.map(d =>
+          d.y > 125 ? 'rgba(248,113,113,0.85)' :
+          d.y > 115 ? 'rgba(245,158,11,0.85)' : 'rgba(74,222,128,0.85)'
+        ),
+        pointRadius: 5, pointHoverRadius: 7,
       },
       {
         label: '理想ライン（ピッチ主導）',
         data: idealLine,
         type: 'line',
         borderColor: '#4ade80',
-        borderWidth: 2,
-        borderDash: [6, 4],
-        pointRadius: 0,
-        fill: false,
+        borderWidth: 2, borderDash: [6,4], pointRadius: 0, fill: false,
       }
     ]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { labels: { color: '#aaa', boxWidth: 12, font: { size: 11 } } },
-      tooltip: {
-        callbacks: {
-          label: ctx => `速度: ${ctx.parsed.x.toFixed(2)} m/s | ストライド: ${ctx.parsed.y}cm`
-        }
-      }
+      tooltip: { callbacks: { label: c => `速度: ${c.parsed.x.toFixed(2)} m/s | ストライド: ${c.parsed.y}cm` } }
     },
     scales: {
-      x: {
-        title: { display: true, text: '速度 (m/s)', color: '#888', font: { size: 11 } },
-        ticks: { color: '#666', font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-        min: 2.5, max: 4.3,
-      },
-      y: {
-        title: { display: true, text: 'ストライド長 (cm)', color: '#888', font: { size: 11 } },
-        ticks: { color: '#666', font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-        min: 80, max: 150,
-      }
+      x: { title: { display: true, text: '速度 (m/s)', color: '#888', font: { size: 11 } },
+        ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1a1a2a' }, min: 2.5, max: 4.3 },
+      y: { title: { display: true, text: 'ストライド長 (cm)', color: '#888', font: { size: 11 } },
+        ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1a1a2a' }, min: 80, max: 150 }
     }
   }
 });
 
-// ─── Chart 3: 1月 vs 6月 比較 ───────────────────────────
-const ctx3 = document.getElementById('chart3').getContext('2d');
-new Chart(ctx3, {
+// ── Chart 3 ─────────────────────────────────────────────
+new Chart(document.getElementById('chart3'), {
   type: 'bar',
   data: {
-    labels: ['接地時間\n最小(ms)', '接地時間\n最大(ms)', 'ピッチ\n下限(spm)', 'ピッチ\n上限(spm)', '上下動\n最大(cm×10)'],
+    labels: ['接地時間\n最小 (ms)', '接地時間\n最大 (ms)', 'ピッチ\n下限 (spm)', 'ピッチ\n上限 (spm)', '上下動\n最大 (mm)'],
     datasets: [
       {
         label: '2026年1月',
         data: [211, 265, 174, 182, 99],
-        backgroundColor: 'rgba(148,163,184,0.4)',
-        borderColor: '#94a3b8',
-        borderWidth: 1.5,
-        borderRadius: 4,
+        backgroundColor: 'rgba(148,163,184,0.35)',
+        borderColor: '#94a3b8', borderWidth: 1.5, borderRadius: 6,
       },
       {
         label: '2026年6月',
         data: [188, 213, 178, 186, 98],
-        backgroundColor: 'rgba(74,222,128,0.4)',
-        borderColor: '#4ade80',
-        borderWidth: 1.5,
-        borderRadius: 4,
+        backgroundColor: 'rgba(74,222,128,0.35)',
+        borderColor: '#4ade80', borderWidth: 1.5, borderRadius: 6,
       },
     ]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { labels: { color: '#aaa', boxWidth: 12, font: { size: 11 } } },
-    },
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#aaa', boxWidth: 12, font: { size: 11 } } } },
     scales: {
-      x: {
-        ticks: { color: '#888', font: { size: 9 } },
-        grid: { color: '#1a1a2a' },
-      },
-      y: {
-        ticks: { color: '#666', font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-      }
+      x: { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#1a1a2a' } },
+      y: { ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1a1a2a' } }
     }
   }
 });
 
-// ─── Chart 4: 心拍ゾーン分布（ドーナツ）──────────────────
-const ctx4 = document.getElementById('chart4').getContext('2d');
-
-// 6/5データから心拍ゾーン集計
-function countZone(data, min, max) {
-  return data.filter(d => d[4] >= min && d[4] < max).length;
+// ── Chart 4 ─────────────────────────────────────────────
+function countZone(min, max) {
+  return ts.filter(d => d[4] >= min && d[4] < max).length;
 }
-const z1 = countZone(ts, 0,   140);  // Z1: リカバリー
-const z2 = countZone(ts, 140, 160);  // Z2: 有酸素
-const z3 = countZone(ts, 160, 170);  // Z3: テンポ
-const z4 = countZone(ts, 170, 180);  // Z4: 閾値
-const z5 = countZone(ts, 180, 999);  // Z5: 無酸素
-
-new Chart(ctx4, {
+new Chart(document.getElementById('chart4'), {
   type: 'doughnut',
   data: {
-    labels: ['Z1 〜139 (リカバリー)', 'Z2 140-159 (有酸素)', 'Z3 160-169 (テンポ)', 'Z4 170-179 (閾値)', 'Z5 180+ (無酸素🚨)'],
+    labels: ['Z1 〜139 リカバリー', 'Z2 140-159 有酸素', 'Z3 160-169 テンポ', 'Z4 170-179 閾値', 'Z5 180+ 無酸素🚨'],
     datasets: [{
-      data: [z1, z2, z3, z4, z5],
+      data: [countZone(0,140), countZone(140,160), countZone(160,170), countZone(170,180), countZone(180,999)],
       backgroundColor: [
-        'rgba(148,163,184,0.7)',
-        'rgba(74,222,128,0.7)',
-        'rgba(250,204,21,0.7)',
-        'rgba(251,146,60,0.7)',
-        'rgba(248,113,113,0.8)',
+        'rgba(148,163,184,0.7)', 'rgba(74,222,128,0.7)', 'rgba(250,204,21,0.7)',
+        'rgba(251,146,60,0.7)',  'rgba(248,113,113,0.85)',
       ],
-      borderColor: '#13131a',
-      borderWidth: 3,
+      borderColor: '#10101a', borderWidth: 3,
     }]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'right',
-        labels: { color: '#aaa', boxWidth: 12, font: { size: 10 }, padding: 8 }
-      },
+      legend: { position: 'bottom', labels: { color: '#aaa', boxWidth: 12, font: { size: 10 }, padding: 8 } },
       tooltip: {
         callbacks: {
-          label: ctx => {
-            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
-            const pct = ((ctx.parsed / total) * 100).toFixed(0);
-            return ` ${ctx.label}: ${pct}% (${ctx.parsed}秒)`;
+          label: c => {
+            const total = c.dataset.data.reduce((a,b)=>a+b,0);
+            return ` ${c.label}: ${((c.parsed/total)*100).toFixed(0)}% (${c.parsed}秒)`;
           }
         }
       }
@@ -532,79 +811,51 @@ new Chart(ctx4, {
   }
 });
 
-// ─── Chart 5: 接地時間 vs 上下動 散布図（色＝心拍）────────
-const ctx5 = document.getElementById('chart5').getContext('2d');
-
-function hrToColor(hr) {
-  if (hr < 160) return 'rgba(74,222,128,0.8)';
-  if (hr < 170) return 'rgba(250,204,21,0.8)';
-  if (hr < 180) return 'rgba(251,146,60,0.8)';
-  return 'rgba(248,113,113,0.8)';
+// ── Chart 5 ─────────────────────────────────────────────
+function hrColor(hr) {
+  if (hr < 160) return 'rgba(74,222,128,0.85)';
+  if (hr < 170) return 'rgba(250,204,21,0.85)';
+  if (hr < 180) return 'rgba(251,146,60,0.85)';
+  return 'rgba(248,113,113,0.85)';
 }
-
-const scatter5 = ts.filter(d => d[5] > 0 && d[6] > 0).map(d => ({
-  x: d[6],  // 接地時間 ms
-  y: d[5],  // 上下動 cm
-  hr: d[4],
-}));
-
-new Chart(ctx5, {
+const scatter5 = ts.filter(d => d[5] > 0 && d[6] > 0).map(d => ({ x: d[6], y: d[5], hr: d[4] }));
+new Chart(document.getElementById('chart5'), {
   type: 'scatter',
   data: {
     datasets: [
       {
-        label: '各秒のデータポイント',
+        label: '各秒データ（色＝心拍）',
         data: scatter5,
-        backgroundColor: scatter5.map(d => hrToColor(d.hr)),
-        pointRadius: 6,
-        pointHoverRadius: 8,
+        backgroundColor: scatter5.map(d => hrColor(d.hr)),
+        pointRadius: 5, pointHoverRadius: 7,
       },
-      // 目標ゾーン
       {
-        label: '目標ゾーン（接地≤210ms・上下動≤9.0cm）',
-        data: [
-          { x: 185, y: 7.5 }, { x: 210, y: 7.5 },
-          { x: 210, y: 9.0 }, { x: 185, y: 9.0 }, { x: 185, y: 7.5 }
-        ],
+        label: '目標ゾーン',
+        data: [{x:185,y:7.5},{x:210,y:7.5},{x:210,y:9.0},{x:185,y:9.0},{x:185,y:7.5}],
         type: 'line',
-        borderColor: 'rgba(74,222,128,0.4)',
+        borderColor: 'rgba(74,222,128,0.5)',
         backgroundColor: 'rgba(74,222,128,0.06)',
-        borderWidth: 1.5,
-        borderDash: [5, 4],
-        pointRadius: 0,
-        fill: true,
+        borderWidth: 1.5, borderDash: [5,4], pointRadius: 0, fill: true,
       }
     ]
   },
   options: {
-    responsive: true,
-    maintainAspectRatio: false,
+    responsive: true, maintainAspectRatio: false,
     plugins: {
       legend: { labels: { color: '#aaa', boxWidth: 12, font: { size: 11 } } },
       tooltip: {
         callbacks: {
-          label: ctx => {
-            if (ctx.datasetIndex === 0) {
-              return `接地: ${ctx.parsed.x}ms | 上下動: ${ctx.parsed.y}cm | 心拍: ${ctx.raw.hr}bpm`;
-            }
-            return ctx.dataset.label;
-          }
+          label: c => c.datasetIndex === 0
+            ? `接地: ${c.parsed.x}ms | 上下動: ${c.parsed.y}cm | 心拍: ${c.raw.hr}bpm`
+            : c.dataset.label
         }
       }
     },
     scales: {
-      x: {
-        title: { display: true, text: '接地時間 (ms)', color: '#888', font: { size: 11 } },
-        ticks: { color: '#666', font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-        min: 180, max: 220,
-      },
-      y: {
-        title: { display: true, text: '上下動 (cm)', color: '#888', font: { size: 11 } },
-        ticks: { color: '#666', font: { size: 10 } },
-        grid: { color: '#1a1a2a' },
-        min: 7.5, max: 10.0,
-      }
+      x: { title: { display: true, text: '接地時間 (ms)', color: '#888', font: { size: 11 } },
+        ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1a1a2a' }, min: 180, max: 220 },
+      y: { title: { display: true, text: '上下動 (cm)', color: '#888', font: { size: 11 } },
+        ticks: { color: '#555', font: { size: 10 } }, grid: { color: '#1a1a2a' }, min: 7.5, max: 10.0 }
     }
   }
 });
