@@ -225,6 +225,37 @@ section {
 .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 16px; }
 .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--blue)); }
 
+/* ── GOAL GAP CARDS ───────────────────────────────────── */
+.gap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-top: 32px;
+}
+.gap-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.gap-event { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+.gap-title { font-size: 16px; font-weight: 700; }
+.gap-row {
+  display: flex; align-items: baseline; gap: 10px; margin-top: 4px;
+}
+.gap-now   { font-size: 24px; font-weight: 800; color: var(--text); }
+.gap-arrow { font-size: 14px; color: var(--muted); }
+.gap-target{ font-size: 24px; font-weight: 800; color: var(--accent); }
+.gap-unit  { font-size: 11px; color: var(--muted); }
+.gap-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; padding: 4px 10px;
+  border-radius: 999px; width: fit-content;
+}
+.gap-badge.close { background: rgba(74,222,128,0.12); color: var(--green); }
+.gap-badge.mid   { background: rgba(250,204,21,0.12); color: var(--yellow); }
+.gap-badge.far   { background: rgba(248,113,113,0.12); color: var(--red); }
+.gap-note { font-size: 12px; color: var(--muted); line-height: 1.7; }
+
 /* ── PLAN CARDS (coach action plan) ───────────────────── */
 .plan-grid {
   display: grid;
@@ -288,6 +319,7 @@ footer span { color: var(--accent); }
     <a href="#trap">ストライドの罠</a>
     <a href="#evolution">5ヶ月の進化</a>
     <a href="#plan">次回メニュー</a>
+    <a href="#goalgap">目標までの距離</a>
     <a href="#goals">目標</a>
   </div>
 </nav>
@@ -309,7 +341,7 @@ footer span { color: var(--accent); }
     <div class="kpi">
       <span class="kpi-label">巡航ピッチ</span>
       <span class="kpi-value blue">174〜180 spm</span>
-      <span class="kpi-delta">全20ログ平均で目標圏内</span>
+      <span class="kpi-delta">全21ログ平均で目標圏内</span>
     </div>
     <div class="kpi">
       <span class="kpi-label">最大心拍（6/5）</span>
@@ -331,17 +363,17 @@ footer span { color: var(--accent); }
 <section id="overview">
   <div class="section-tag">Overview</div>
   <h2 class="section-title">現在地のサマリー</h2>
-  <p class="section-body">COROSフライトデータ全20ログ（2025.12.28〜2026.06.05・総距離347.4km・総活動41.0時間）を完全解析。6月5日Bメニュー（5'35"/km）の詳細データと合わせ、主要ダイナミクス指標の達成度を評価する。</p>
+  <p class="section-body">COROSフライトデータ全21ログ（2025.12.28〜2026.06.11・総距離355.8km・総活動42.0時間）を完全解析。6月5日Bメニュー（5'35"/km）の詳細データと合わせ、主要ダイナミクス指標の達成度を評価する。</p>
 
   <div class="metrics-strip">
     <div class="metric">
       <div class="metric-label">解析セッション数</div>
-      <div class="metric-value ok">20 本</div>
+      <div class="metric-value ok">21 本</div>
       <div class="metric-note ok">✅ 全.fitログを完全反映</div>
     </div>
     <div class="metric">
       <div class="metric-label">総距離 / 総活動時間</div>
-      <div class="metric-value ok">347.4 km / 41.0 h</div>
+      <div class="metric-value ok">355.8 km / 42.0 h</div>
       <div class="metric-note ok">✅ 5.5ヶ月の蓄積</div>
     </div>
     <div class="metric">
@@ -466,11 +498,11 @@ footer span { color: var(--accent); }
 <section id="evolution">
   <div class="section-tag">5-Month Progress · Jan → Jun 2026</div>
   <h2 class="section-title">5ヶ月間の進化</h2>
-  <p class="section-body">2025年12月28日〜2026年6月5日、COROSに記録された全20セッション（総距離347.4km）のセッション平均値を時系列でプロット。1本ずつのブレではなく「トレンド」で適応を確認する。</p>
+  <p class="section-body">2025年12月28日〜2026年6月11日、COROSに記録された全21セッション（総距離355.8km）のセッション平均値を時系列でプロット。1本ずつのブレではなく「トレンド」で適応を確認する。</p>
 
   <div class="chart-grid">
     <div class="card col-12">
-      <div class="card-eyebrow">Full-Season Trend · 全20ログ（2025.12.28-2026.06.05）</div>
+      <div class="card-eyebrow">Full-Season Trend · 全21ログ（2025.12.28-2026.06.11）</div>
       <div class="card-title">接地時間 / ピッチ / 上下動 のセッション平均推移</div>
       <div class="card-sub">右肩下がりの接地時間、底上げされるピッチ。足裏神経系の適応が「線」で見える</div>
       <div class="chart-wrap" style="height:300px">
@@ -545,6 +577,69 @@ footer span { color: var(--accent); }
 
 <hr class="divider">
 
+<!-- SECTION 5.5: GOAL GAP -->
+<section id="goalgap">
+  <div class="section-tag">Goal Gap · 現在地と目標の距離</div>
+  <h2 class="section-title">目標まで、あと何が必要か</h2>
+  <p class="section-body">「あと何キロ」ではなく「あと何秒・あと何分」で見る。ゴールが近いと分かれば、次の一歩が軽くなる。</p>
+
+  <div class="gap-grid">
+    <div class="gap-card">
+      <div class="gap-event">🏅 びわ湖マラソン 2027.3.14 · サブ4</div>
+      <div class="gap-title">フルマラソン 閾値ペース</div>
+      <div class="gap-row">
+        <span class="gap-now">5'35"</span>
+        <span class="gap-arrow">→</span>
+        <span class="gap-target">5'34"</span>
+        <span class="gap-unit">/km</span>
+      </div>
+      <div class="gap-badge close">🟢 あと1秒/km・射程内</div>
+      <div class="gap-note">6/5のBメニューで既に閾値5'35"/kmを記録。残るは「その閾値を42.2km、心拍180bpm以下で持続できるか」。ピッチ主導化が最後の1秒を埋める。</div>
+    </div>
+
+    <div class="gap-card">
+      <div class="gap-event">⚡ かすみがうら 2027 · 10マイル</div>
+      <div class="gap-title">スピード持久 維持時間</div>
+      <div class="gap-row">
+        <span class="gap-now">25分</span>
+        <span class="gap-arrow">→</span>
+        <span class="gap-target">82分</span>
+        <span class="gap-unit">@ 5'05"/km</span>
+      </div>
+      <div class="gap-badge mid">🟡 ペースは到達済み・持続時間が壁</div>
+      <div class="gap-note">6/5の1.77kmは4'58"/kmで走破済み＝ペース自体は目標(5'05")を上回る。課題は「その出力を16km(82分)まで伸ばす」スピード持久力。Bメニューのメイン区間を段階的に20→25→30分へ。</div>
+    </div>
+
+    <div class="gap-card">
+      <div class="gap-event">🌊 サロマ湖 100km 2027</div>
+      <div class="gap-title">ウルトラ 平均ペース</div>
+      <div class="gap-row">
+        <span class="gap-now">8'20"</span>
+        <span class="gap-arrow">→</span>
+        <span class="gap-target">7'00"</span>
+        <span class="gap-unit">/km</span>
+      </div>
+      <div class="gap-badge far">🔴 あと1分20秒/km・最大の壁</div>
+      <div class="gap-note">3/13の97.7km走（約13.6時間）が現状の実力値。脂質代謝とワラーチ由来の体幹強度は◎なので、土台は完成済み。ここからは「平日Bで作った閾値ペースの底上げ」がそのままウルトラの巡航ペースを引き上げる。</div>
+    </div>
+
+    <div class="gap-card">
+      <div class="gap-event">💪 Daily Goal · 省エネボディ</div>
+      <div class="gap-title">セッション平均 接地時間</div>
+      <div class="gap-row">
+        <span class="gap-now">200</span>
+        <span class="gap-arrow">→</span>
+        <span class="gap-target">190</span>
+        <span class="gap-unit">ms 以下を安定化</span>
+      </div>
+      <div class="gap-badge close">🟢 トレンドは順調・あと10ms</div>
+      <div class="gap-note">'25.12の249ms→'26.6の200msまで▲49ms短縮済み。このペースで適応が続けば、上下動9.0cm未満との両立も射程内。日々のゴルフボールリリースと足指スプレッドが効いている証拠。</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
 <!-- SECTION 6: GOALS -->
 <section id="goals">
   <div class="section-tag">Race Goals · 2027</div>
@@ -594,7 +689,7 @@ footer span { color: var(--accent); }
 <hr class="divider">
 
 <footer>
-  <p>Generated by <span>AI Running Coach</span> · Data Source: COROS Export (.fit ×20 / 2025.12.28-2026.06.05・347.4km) · Updated 2026.06.07</p>
+  <p>Generated by <span>AI Running Coach</span> · Data Source: COROS Export (.fit/.tcx ×21 / 2025.12.28-2026.06.11・355.8km) · Updated 2026.06.13</p>
   <p style="margin-top:8px;">大髙龍 · 28歳 · 博士課程 / ビジネスアスリート</p>
 </footer>
 
@@ -666,6 +761,7 @@ const allSessions = [
   ['2026-05-30', 'run', 16.62, 6.89, 150, 180, 8.2, 236, 172],
   ['2026-06-05', 'run', 7.44, 5.59, 165, 174, 9.6, 221, 190],
   ['2026-06-05', 'run', 1.77, 4.98, 181, 178, 9.1, 200, 190],
+  ['2026-06-11', 'run', 8.43, 6.97, 152, 183, null, null, 171],
 ];
 
 const labels1 = ts.map(d => d[0] + 's');
